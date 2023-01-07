@@ -8,9 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using static SAPAPILayer.APIRequest;
+using System.Net;
 
 namespace SAPAPILayer
 {
@@ -49,8 +53,8 @@ namespace SAPAPILayer
             string reqURI = sapurl + apiname;
             log.LogInformation("OData URL : " + reqURI);
 
-            // retrieve a token and cookies for the Purchase Order request
-            var (token, cookies) = GetTokenCookies(auth, log).Result;
+            // retrieve a token and cookies for the Purchase Order request --> Is this needed? No xcsrf token needed for a GET
+            var (token, cookies) = GetTokenCookies(reqURI,auth, log).Result;
             if(token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "Token could not be retrieved" });
 
             // retrieve the Purchase Order
@@ -120,14 +124,36 @@ namespace SAPAPILayer
             log.LogInformation("OData URL : " + reqURI);
 
             // retrieve a token and cookies for the Purchase Order request
-            var (token, cookies) = GetTokenCookies(auth, log).Result;
-            if (token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "Token could not be retrieved" });
+            var (token, cookies) = GetTokenCookies(reqURI, auth, log).Result;
+            if (token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "XCSRF Token could not be retrieved" });
 
             // create a new Purchase Order
+            log.LogInformation("Creating the Purchase Order");
+            var postResponse = PostAPIQuery(reqURI, requestBody, token, cookies, log).Result;
+            log.LogInformation("ResponseStatus : " + postResponse.StatusCode);
+            if (postResponse.StatusCode != 200) return new NotFoundObjectResult(new APIResponse { Status = "Failed", StatusCode = postResponse.StatusCode, Error = postResponse.Error });
+            JsonNode result = JsonNode.Parse(postResponse.Data)!["d"]!;
+            var poObj = JsonSerializer.Deserialize<PurchaseOrderObj>(result.ToString());
+            log.LogInformation($"Purchase Order {poObj.PurchaseOrder} successfully created");
+            
+            // prepare a Purchase Order Object with Purchase Order Items
+            log.LogInformation("Prepare Purchase Order object as response");
+            var poItems = JsonNode.Parse(postResponse.Data)!["d"]!["to_PurchaseOrderItem"]!["results"]!.AsArray();
+            List<PurchaseOrderItemObj> items = new List<PurchaseOrderItemObj>();
+            foreach (var poItem in poItems)
+            {
+                var itemNode = JsonSerializer.Deserialize<PurchaseOrderItemObj>(poItem.ToString());
+                items.Add(itemNode);
+            }
+            poObj.Items = items;
 
-
+            string reponseText = $"Purchase Order {poObj.PurchaseOrder} successfully created";
+            PurchaseOrderCreateResponse poCreateResp = new PurchaseOrderCreateResponse();
+            poCreateResp.reponseText = reponseText;
+            poCreateResp.purchaseOrderObj = poObj;
             // return the result
-            return new OkObjectResult("");
+            return new OkObjectResult(poCreateResp);
+
         }
 
 
@@ -163,7 +189,7 @@ namespace SAPAPILayer
             log.LogInformation("OData URL : " + reqURI);
 
             // retrieve a Purchase Order token
-            var (token, cookies) = GetTokenCookies(auth, log).Result;
+            var (token, cookies) = GetTokenCookies(reqURI,auth, log).Result;
             if (token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "Token could not be retrieved" });
 
             // retrieve the Purchase Orders
@@ -184,9 +210,16 @@ namespace SAPAPILayer
             return new OkObjectResult(items);
         }
 
+        public class PurchaseOrderCreateResponse
+        {
+            public string reponseText { get; set; }
+            public PurchaseOrderObj purchaseOrderObj { get; set; }
+        }
 
         public class PurchaseOrderObj
         {
+            public string PurchaseOrder { get; set; }
+            
             private string creationdate;
 
             public string PurchaseOrderType { get; set; }

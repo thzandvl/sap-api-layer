@@ -1,2 +1,2 @@
 # SAP API Layer
-An SAP Layer on top of SAP OData services.
+A simplified API Layer on top of SAP OData services.
