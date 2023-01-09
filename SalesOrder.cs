@@ -50,7 +50,7 @@ namespace SAPAPILayer
             log.LogInformation("OData URL : " + reqURI);
 
             // retrieve a token and cookies for the Sales Order request
-            var (token, cookies) = GetTokenCookies(auth, log).Result;
+            var (token, cookies) = GetTokenCookies(sapurl, auth, log).Result;
             if (token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "Token could not be retrieved" });
 
             // retrieve the Sales Order Header
@@ -113,7 +113,7 @@ namespace SAPAPILayer
             log.LogInformation("OData URL : " + reqURI);
 
             // retrieve a Sales Order token
-            var (token, cookies) = GetTokenCookies(auth, log).Result;
+            var (token, cookies) = GetTokenCookies(sapurl, auth, log).Result;
             if (token == null) return new UnauthorizedObjectResult(new APIResponse { Status = "Failed", StatusCode = 500, Error = "Token could not be retrieved" });
 
             // retrieve the Sales Order List
