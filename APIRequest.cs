@@ -108,6 +108,13 @@ namespace SAPAPILayer
 
                 CookieCollection cookies = cookieContainer.GetCookies(new Uri(sapurl));
 
+                log.LogInformation("----------Cookies------------");
+                foreach(var cookie in  cookies)
+                {
+                    log.LogInformation(cookie.ToString());
+                }
+                log.LogInformation("-------------------------------");
+
                 return (token, cookies);
             }
             catch(Exception ex)

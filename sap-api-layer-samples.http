@@ -1,0 +1,57 @@
+@user = FUNCTIONAPP
+@pass = Appl1ance
+
+GET https://sap-api-layer.azurewebsites.net/api/swagger/json
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET http://localhost:7051/api/GetSalesOrder?num=4662
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET http://localhost:7051/api/GetSalesOrderList
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET http://localhost:7051/api/GetPurchaseOrder?num=4500001303
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET http://localhost:7051/api/GetPurchaseOrderList
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET https://sap-api-layer.azurewebsites.net/api/GetSalesOrder?num=4662
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET https://sap-api-layer.azurewebsites.net/api/GetSalesOrderList
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET https://sap-api-layer.azurewebsites.net/api/GetPurchaseOrder?num=4500001303
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+###
+
+GET https://sap-api-layer.azurewebsites.net/api/GetPurchaseOrderList
+content-type: application/json
+Authorization: Basic {{user}}:{{pass}}
+
+
+#Authorization: Basic RlVOQ1RJT05BUFA6QXBwbDFhbmNl
