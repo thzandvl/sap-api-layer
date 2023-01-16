@@ -1,5 +1,5 @@
-@user = FUNCTIONAPP
-@pass = Appl1ance
+@user = <username>
+@pass = <password
 
 GET https://sap-api-layer.azurewebsites.net/api/swagger/json
 content-type: application/json
@@ -52,6 +52,3 @@ Authorization: Basic {{user}}:{{pass}}
 GET https://sap-api-layer.azurewebsites.net/api/GetPurchaseOrderList
 content-type: application/json
 Authorization: Basic {{user}}:{{pass}}
-
-
-#Authorization: Basic RlVOQ1RJT05BUFA6QXBwbDFhbmNl
